@@ -3,10 +3,9 @@ from shutil import copyfile
 
 import numpy as np
 
-import config
-
 from .. utils.sqlite_data_adapters import adapt_array, convert_array
 from .. utils import aux
+from ... import config
 
 
 sqlite3.register_adapter(np.ndarray, adapt_array)

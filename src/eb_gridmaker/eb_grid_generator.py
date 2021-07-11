@@ -1,6 +1,6 @@
 import numpy as np
 
-import config
+from .. import config
 from . utils import aux, physics, multiproc, dtb
 from elisa import BinarySystem, settings, Observer
 from elisa.base.error import LimbDarkeningError, AtmosphereError
