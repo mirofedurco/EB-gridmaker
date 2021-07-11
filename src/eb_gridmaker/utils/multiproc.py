@@ -1,6 +1,6 @@
 from multiprocessing import Pool
 
-from ... import config
+from .. import config
 
 
 def multiprocess_eval(items, fn, args):

@@ -1,7 +1,7 @@
 import numpy as np
 from math import modf
 
-from ... import config
+from .. import config
 
 
 def estimate_size(grid_size):
