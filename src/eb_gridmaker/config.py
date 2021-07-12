@@ -23,15 +23,15 @@ PASSBANDS = [
 ]
 
 T_MAX_OVERCONTACT = 8000  # maximum allowed temperature of the overcontact system components
-MAX_DIFF_T_OVERCONTACT = 1000  # maximum temperature difference between overcontact components
+MAX_DIFF_T_OVERCONTACT = 500  # maximum temperature difference between overcontact components
 
 # if you want to extend the table once the table is generated, do it only by appending the desired values to the end of
 # existing arrays, DO NOT INSERT additional values between original values once the table is (partially) generated
 Q_ARRAY = np.round(np.arange(0.1, 1.01, 0.1), 3)  # grid mass ratios
 R_ARRAY = np.round(np.arange(0.01, 1.0, 0.04), 6)  # grid of component's radii
 I_ARRAY = np.round(np.arange(0.0, 1.01, 0.1), 6)  # ranges of inclinations (i_min + I_ARRAY*(90-i_min))
-T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000)))  # t_eff of components
-# T_ARRAY = np.concatenate((np.arange(4000, 10001, 500), np.arange(11000, 20001, 1000)))  # t_eff of components
+T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000), np.arange(25000, 50000, 5000)))  # t_eff of components
+# T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000)))  # t_eff of components/
 
 PARAMETER_COLUMNS = (
     'id', 'mass_ratio',

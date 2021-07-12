@@ -9,6 +9,7 @@ from elisa.binary_system.model import (
 )
 from elisa.binary_system.radius import calculate_side_radius
 from .. utils.default_binary_model import DEFAULT_SYSTEM
+from .. import config
 
 
 def side_radius_potential_primary(radius, mass_ratio):
@@ -68,6 +69,15 @@ def critical_inclination(r1, r2):
 
 
 def correct_sma(mass_ratio, r1, r2):
+    """
+    Function will provide a values for sma and period that will create binary models with surface g within table
+    coverage.
+
+    :param mass_ratio: float;
+    :param r1: float;
+    :param r2: float;
+    :return: tuple; sma in sol rad, period in days
+    """
     mid_g = 10 ** 1.5
     m1 = 4e30
     m2 = mass_ratio * m1
@@ -81,7 +91,24 @@ def correct_sma(mass_ratio, r1, r2):
     return 1.4374e-9 * sma, period / 86400
 
 
-def initialize_system(mass_ratio, r1, r2, t1, t2, inclination, omega1, omega2):
+def initialize_system(mass_ratio, r1, r2, t1, t2, inclination, omega1, omega2, overcontact):
+    """
+    Initializing binary system based on grid params.
+
+    :param mass_ratio: float;
+    :param r1: float;
+    :param r2: float;
+    :param t1: int;
+    :param t2: int;
+    :param inclination: float;
+    :param omega1: float;
+    :param omega2: float;
+    :param overcontact: bool;
+    :return: elisa.BinarySystem
+    """
+    dt = t1 - t2
+    if overcontact and np.abs(dt) > config.MAX_DIFF_T_OVERCONTACT:
+        t2 = t1 - config.MAX_DIFF_T_OVERCONTACT if dt > 0.0 else t1 + config.MAX_DIFF_T_OVERCONTACT
 
     sma, period = correct_sma(mass_ratio, r1, r2)
     params = copy(DEFAULT_SYSTEM)

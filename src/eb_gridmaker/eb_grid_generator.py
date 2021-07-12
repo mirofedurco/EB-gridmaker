@@ -34,8 +34,12 @@ def basic_param_eval(params, crit_potentials=None, omega1=None, omega2=None):
             return False, None
         elif t2 > config.T_MAX_OVERCONTACT or t1 > config.T_MAX_OVERCONTACT:
             return False, None  # do not sample too hot overcontacts
-        elif np.abs(t2-t1) > config.MAX_DIFF_T_OVERCONTACT:  # not allowing too different temperatures in overcontacts
-            return False, None
+
+        elif np.abs(t2-t1) > config.MAX_DIFF_T_OVERCONTACT:
+            idx_t1 = np.where(t1 == config.T_ARRAY)[0]
+            idx_t2 = np.where(t2 == config.T_ARRAY)[0]
+            if np.abs(idx_t1-idx_t2) > 1:  # not allowing too different temperatures in overcontacts
+                return False, None
 
         overcontact = True
     else:  # treating detached
@@ -76,7 +80,7 @@ def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_c
     omega2 = omega1 if overcontact else omega2_grid[idxs[0], idxs[2]]
     params[-1] = aux.generate_i(i_crits[idxs[1], idxs[2]], params[-1])
 
-    bs = physics.initialize_system(*params, omega1=omega1, omega2=omega2)
+    bs = physics.initialize_system(*params, omega1=omega1, omega2=omega2, overcontact=overcontact)
     o = Observer(passband=config.PASSBANDS, system=bs)
 
     try:
