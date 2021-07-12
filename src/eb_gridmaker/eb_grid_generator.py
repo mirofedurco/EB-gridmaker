@@ -78,6 +78,10 @@ def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_c
     print(f'Processing node: {aug_counter}/{maxiter}, {100.0*aug_counter/maxiter:.2f}%')
     omega1 = omega1_grid[idxs[0], idxs[1]]
     omega2 = omega1 if overcontact else omega2_grid[idxs[0], idxs[2]]
+
+    # if secondary component t_eff is bigger, switch primary and secondary components
+    params, omega1, omega2 = physics.switch_components(*params, omega1=omega1, omega2=omega2)
+
     params[-1] = aux.generate_i(i_crits[idxs[1], idxs[2]], params[-1])
 
     bs = physics.initialize_system(*params, omega1=omega1, omega2=omega2, overcontact=overcontact)

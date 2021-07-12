@@ -2,6 +2,7 @@ import os
 import numpy as np
 
 DATABASE_NAME = 'ceb_atlas.db'
+# NUMBER_OF_PROCESSES = 1
 NUMBER_OF_PROCESSES = os.cpu_count()
 N_POINTS = 400  # number of points in LC
 
