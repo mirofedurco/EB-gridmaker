@@ -38,7 +38,7 @@ PARAMETER_COLUMNS = (
     'id', 'mass_ratio',
     'primary__surface_potential', 'secondary__surface_potential',
     'primary__t_eff', 'secondary__t_eff',
-    'inclination', 'critical_surface_potential', 'morphology',
+    'inclination', 'critical_surface_potential', 'overcontact',
     'primary__equivalent_radius', 'secondary__equivalent_radius',
     'primary__filling_factor', 'secondary__filling_factor',
 )
@@ -47,7 +47,7 @@ PARAMETER_TYPES = (
     'INTEGER NOT NULL', 'REAL',
     'REAL', 'REAL',
     'INTEGER', 'INTEGER',
-    'REAL', 'REAL', 'TEXT',
+    'REAL', 'REAL', 'INTEGER',
     'REAL', 'REAL',
     'REAL', 'REAL',
 )

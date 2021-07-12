@@ -75,8 +75,13 @@ def getattr_from_collumn_name(system, column_name):
             raise ValueError('Only `primary` or `secondary` prefix can be in front of the `__` separator.')
         return getattr(getattr(system, colname_split[0]), colname_split[1])
     else:
-        return getattr(system, colname_split[0]) \
-            if colname_split[0] != 'critical_surface_potential' else getattr(system.primary, colname_split[0])
+        if colname_split[0] == 'critical_surface_potential':
+            return getattr(system.primary, colname_split[0])
+        elif colname_split[0] == 'overcontact':
+            morph = getattr(system, 'morphology')
+            return 1 if morph in ['over-contact', 'overcontact'] else 0
+        else:
+            return getattr(system, colname_split[0])
 
 
 def typing(values, types):
