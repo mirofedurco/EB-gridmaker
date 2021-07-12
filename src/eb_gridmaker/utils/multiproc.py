@@ -1,4 +1,5 @@
 from multiprocessing import Pool
+import numpy as np
 
 from .. import config
 
@@ -12,7 +13,16 @@ def multiprocess_eval(items, fn, args):
     :param args: tuple; arguments of curve evaluation function
     :return:
     """
-    pool = Pool(processes=config.NUMBER_OF_PROCESSES)
-    [pool.apply_async(fn, (iden, ii)+args) for ii, iden in enumerate(items)]
-    pool.close()
-    pool.join()
+    chunksize = 1000
+    n_chunks = int(len(items) / chunksize + 1)
+    for jj in range(n_chunks):
+        print(f'Chunk {jj+1}/{n_chunks}.')
+
+        idxs = np.arange(jj*chunksize, (jj+1)*chunksize)
+        idxs = idxs[idxs < len(items)]
+        chunk_items = items[idxs]
+        pool = Pool(processes=config.NUMBER_OF_PROCESSES)
+        [pool.apply_async(fn, (iden, ii+jj*chunksize)+args) for ii, iden in enumerate(chunk_items)]
+
+        pool.close()
+        pool.join()

@@ -78,7 +78,7 @@ def correct_sma(mass_ratio, r1, r2):
     :param r2: float;
     :return: tuple; sma in sol rad, period in days
     """
-    mid_g = 10 ** 1.5
+    mid_g = 270
     m1 = 4e30
     m2 = mass_ratio * m1
 

@@ -108,7 +108,7 @@ def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0):
     settings.configure(LOG_CONFIG='fit', MAX_DISCRETIZATION_FACTOR=8)
     if db_name is not None:
         config.DATABASE_NAME = db_name
-    phases = np.linspace(0, 1.0, num=config.N_POINTS)
+    phases = np.linspace(0, 1.0, num=config.N_POINTS, endpoint=False)
     # generating IDs of each possible combination
     ids = np.arange(0, config.MAX_ID, dtype=np.int)
     # randomizing calculation to fill the grid homogenously

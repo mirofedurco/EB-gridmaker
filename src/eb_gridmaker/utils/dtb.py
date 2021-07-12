@@ -152,6 +152,8 @@ def search_for_breakpoint(db_name, ids):
         raise ValueError('IDs of already calculated objects do not correspond to the generated ID. Breakpoint cannot '
                          'be generated.')
 
+    conn.close()
+
 
 def merge_databases(db_list, result_db):
     """
