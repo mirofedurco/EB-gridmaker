@@ -35,7 +35,6 @@ def basic_param_eval(params, crit_potentials=None, omega1=None, omega2=None):
             return False, None  # do not sample too hot overcontacts
 
         elif np.abs(t2-t1) > config.MAX_DIFF_T_OVERCONTACT:
-            print(np.abs(t2-t1))
             idx_t1 = np.where(t1 == config.T_ARRAY)[0]
             idx_t2 = np.where(t2 == config.T_ARRAY)[0]
             if np.abs(idx_t1-idx_t2) > 1:  # not allowing too different temperatures in overcontacts
