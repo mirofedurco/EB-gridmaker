@@ -3,9 +3,9 @@ from shutil import copyfile
 
 import numpy as np
 
-from .. utils.sqlite_data_adapters import adapt_array, convert_array
-from .. utils import aux
-from .. import config
+from eb_gridmaker.utils.sqlite_data_adapters import adapt_array, convert_array
+from eb_gridmaker.utils import aux
+from eb_gridmaker import config
 
 
 sqlite3.register_adapter(np.ndarray, adapt_array)
@@ -30,7 +30,7 @@ def create_ceb_db(db_name):
     # creating table for each curve
     columns = config.PARAMETER_COLUMNS[:1] + config.PASSBAND_COLLUMNS
     types = config.PARAMETER_TYPES[:1] + tuple('ARRAY' for _ in config.PASSBAND_COLLUMNS)
-    foreign_key = 'FOREIGN KEY (id) REFERENCES parameters (id)'
+    foreign_key = 'PRIMARY KEY (id), FOREIGN KEY (id) REFERENCES parameters (id)'
     create_table('curves', columns, types, *db_args, **dict(additive=foreign_key))
 
     # create index database
@@ -171,17 +171,62 @@ def merge_databases(db_list, result_db):
     if os.path.isfile(result_db):
         raise IOError('Output file already exists.')
 
-    copyfile(db_list[0], result_db)
-
+    create_ceb_db(result_db)
     conn = sqlite3.connect(result_db, detect_types=sqlite3.PARSE_DECLTYPES)
     cursor = conn.cursor()
     cursor.execute('DROP TABLE auxiliary')
+    conn.commit()
 
-    for fl in db_list[1:]:
-        cursor.execute('ATTACH DATABASE ? AS db2', (fl, ))
-        cursor.execute('INSERT INTO parameters SELECT * FROM db2.parameters')
-        cursor.execute('INSERT INTO curves SELECT * FROM db2.curves')
+    string1 = ', '.join(config.PARAMETER_COLUMNS[1:])
+    string2 = ', '.join(config.PASSBAND_COLLUMNS[1:])
+    for fl in db_list:
+        cursor.execute('ATTACH DATABASE ? AS db2', (fl,))
+        cursor.execute(f'INSERT INTO parameters({string1}) SELECT {string1} FROM db2.parameters')
+        cursor.execute(f'INSERT INTO curves({string2}) SELECT {string2} FROM db2.curves')
         conn.commit()
         cursor.execute('DETACH DATABASE db2')
 
+    # copyfile(db_list[0], result_db)
+    #
+    # conn = sqlite3.connect(result_db, detect_types=sqlite3.PARSE_DECLTYPES)
+    # # conn.row_factory = lambda cursor, row: row[0]
+    # cursor = conn.cursor()
+    # cursor.execute('DROP TABLE auxiliary')
+    #
+    # for fl in db_list[1:]:
+    #     cursor.execute('ATTACH DATABASE ? AS db2', (fl, ))
+    #     cursor.execute('INSERT INTO parameters SELECT * FROM db2.parameters')
+    #     cursor.execute('INSERT INTO curves SELECT * FROM db2.curves')
+    #     conn.commit()
+    #     cursor.execute('DETACH DATABASE db2')
+    #
+    # cursor.execute('SELECT id from parameters')
+    # ids = cursor.fetchall()
+    # cursor.executemany('UPDATE parameters SET id=?', ((val,) for val in myList))
+
+    conn.commit()
     conn.close()
+
+
+def get_observations(db_name, ids, passbands):
+    invalid_passbands = [passband for passband in passbands if passband not in config.PASSBAND_COLLUMN_MAP.values()]
+    if len(invalid_passbands) > 0:
+        raise ValueError(f'Invalid passbands: {invalid_passbands}.')
+
+    psbnd_str = ', '.join(passbands) + ', id'
+
+    conn = sqlite3.connect(db_name, detect_types=sqlite3.PARSE_DECLTYPES)
+    cursor = conn.cursor()
+    # sql = f"SELECT {psbnd_str} FROM curves where id in ({clmns})"
+    sql = f"SELECT {psbnd_str} FROM curves"
+    # cursor.execute(sql, ids)
+    cursor.execute(sql)
+
+    resfile = {passband: [] for passband in passbands}
+    for ii, row in enumerate(cursor):
+        print(ii)
+        if row[-1] in ids:
+            for ii, passband in enumerate(passbands):
+                resfile[passband].append(row[ii])
+
+    return resfile

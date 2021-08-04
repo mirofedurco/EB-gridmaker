@@ -1,7 +1,7 @@
 import numpy as np
 
-from . import config
-from . utils import aux, physics, multiproc, dtb
+from eb_gridmaker.utils import aux, physics, multiproc
+from eb_gridmaker import dtb, config
 from elisa import BinarySystem, settings, Observer
 from elisa.base.error import LimbDarkeningError, AtmosphereError
 
@@ -50,10 +50,12 @@ def basic_param_eval(params, crit_potentials=None, omega1=None, omega2=None):
     return True, overcontact
 
 
-def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, start_index):
+def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, start_index,
+                   desired_morphology):
     """
     Evaluating binary system located on grid node defined by its unique ID.
 
+    :param desired_morphology: string; `all`, `detached`, `overcontact`
     :param iden: str; node ID
     :param counter: int; current number of already calculeted nodes
     :param crit_potentials: float; critical potential of the system
@@ -72,6 +74,11 @@ def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_c
                                           omega2=omega2_grid[idxs[0], idxs[2]])
 
     if not valid:
+        return
+
+    if desired_morphology == 'detached' and overcontact:
+        return
+    elif desired_morphology == 'overcontact' and not overcontact:
         return
 
     aug_counter = counter + start_index
@@ -97,12 +104,14 @@ def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_c
     dtb.insert_observation(config.DATABASE_NAME, o, iden)
 
 
-def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0):
+def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0, desired_morphology='all'):
     """
     This loop will evaluate the part/whole grid using Pool of workers. Calculation can be split to bathes by defining a
     sub-interval of (0, 1) to downsize the grid calculated in this loop which is helpful if you want to split the
     calculations on multiple machines. Use then utils.dtb.merge_databases to join databases to a single one.
 
+    :param db_name: str; path to the database
+    :param desired_morphology: string; `all`, `detached`, `overcontact`
     :param bottom_boundary: float; defines lower boundary of given batch, select 0 for calculation of the whole grid at
                                    once
     :param top_boundary: float; defines upper boundary of given batch, select 1 for calculation of the whole grid at
@@ -136,12 +145,12 @@ def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0):
     print(f'Breakpoint found {100.0*brkpoint/maxiter:.2f}%: {brkpoint}/{maxiter}')
     ids = ids[brkpoint:]
 
-    args = (crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, brkpoint)
+    args = (crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, brkpoint, desired_morphology)
     multiproc.multiprocess_eval(ids, eval_grid_node, args)
 
 
 if __name__ == "__main__":
-    evaluate_grid('../../ceb_atlas.db', 0.0, 1.0)
+    evaluate_grid('../../ceb_atlas2.db', 0.5, 1.0, desired_morphology='detached')
 
     # sz = aux.estimate_size(config.COUNTER)
     # print(f'Number of of expected nodes: {config.COUNTER*10} with size: {10*sz} Gb. \n')

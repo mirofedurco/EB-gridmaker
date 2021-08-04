@@ -17,9 +17,9 @@ community_params = {
         "surface_potential": 7.1,
         "synchronicity": 1.0,
         "t_eff": "6900.0 K",  # parameters can be provided in string representation consistent with astropy unit format
-        # "gravity_darkening": 1.0,
-        # "albedo": 1.0,
-        # "metallicity": 0.0
+        "gravity_darkening": 1.0,
+        "albedo": 1.0,
+        "metallicity": 0.0
     },
     "secondary": {
         "surface_potential": 7.1,
@@ -31,7 +31,7 @@ community_params = {
     }
 }
 
-bs = BinarySystem.from_json(community_params)
+# bs = BinarySystem.from_json(community_params)
 
 params = {
     "system": {
@@ -63,9 +63,9 @@ params = {
     }
 }
 
-# primary = Star(**params['primary'])
-# secondary = Star(**params['secondary'])
-# bs = BinarySystem(primary=primary, secondary=secondary, **params['system'])
+primary = Star(**params['primary'])
+secondary = Star(**params['secondary'])
+bs = BinarySystem(primary=primary, secondary=secondary, **params['system'])
 
 print(bs.primary.gravity_darkening, bs.secondary.gravity_darkening)
 print(bs.primary.albedo, bs.secondary.albedo)

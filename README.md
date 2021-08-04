@@ -52,9 +52,10 @@ Generating a grid can be performed by the command::
 This will create the whole grid at once. However, calculation can be split to multiple machines where each machine will 
 calculate a portion of the grid::
 
-    evaluate_grid(db_name='path/to/grid_part1.db', bottom_boundary=0.0, top_boundary=0.5)
-    
-This command in particular will create one half of the grid. In order to merge databases from each machine you can use 
+    evaluate_grid(db_name='path/to/grid_part1.db', bottom_boundary=0.0, top_boundary=0.5, desired_morphology='all')
+
+Command can sample only `detached` or `overcontact` systems specified by the `desired_morphology` keyword argument.   
+Previous command will create one half of the grid. In order to merge databases from each machine you can use 
 following command::
 
     db_files = ['path/to/grid_part1.db', 'path/to/grid_part2.db']
