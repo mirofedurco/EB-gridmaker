@@ -73,7 +73,3 @@ PASSBAND_COLLUMNS = tuple(PASSBAND_COLLUMN_MAP[p] for p in PASSBANDS)
 
 # ______________________AUXILIARY_VARIABLES____________________________________
 COUNTER = 0
-OVERCONTACT_T_ARRAY = T_ARRAY[T_ARRAY <= T_MAX_OVERCONTACT]
-MAX_G_RATIO = 1e5
-MAX_ID = np.prod([Q_ARRAY.size, R_ARRAY.size ** 2, I_ARRAY.size, T_ARRAY.size ** 2])
-PARAM_ORDER = [Q_ARRAY, R_ARRAY, R_ARRAY, T_ARRAY, T_ARRAY, I_ARRAY]

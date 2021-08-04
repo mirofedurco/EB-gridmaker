@@ -25,7 +25,6 @@ def basic_param_eval(params, crit_potentials=None, omega1=None, omega2=None):
     """
     r2 = params[2]
     t1, t2 = params[3], params[4]
-
     if omega1 <= crit_potentials[2]:  # check for system overflow through L2
         return False, None
 
@@ -36,6 +35,7 @@ def basic_param_eval(params, crit_potentials=None, omega1=None, omega2=None):
             return False, None  # do not sample too hot overcontacts
 
         elif np.abs(t2-t1) > config.MAX_DIFF_T_OVERCONTACT:
+            print(np.abs(t2-t1))
             idx_t1 = np.where(t1 == config.T_ARRAY)[0]
             idx_t2 = np.where(t2 == config.T_ARRAY)[0]
             if np.abs(idx_t1-idx_t2) > 1:  # not allowing too different temperatures in overcontacts
@@ -51,7 +51,7 @@ def basic_param_eval(params, crit_potentials=None, omega1=None, omega2=None):
 
 
 def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, start_index,
-                   desired_morphology):
+                   desired_morphology, maxid):
     """
     Evaluating binary system located on grid node defined by its unique ID.
 
@@ -67,7 +67,7 @@ def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_c
     :param start_index: int; number of iterations already calculated before interuption
     :return: None
     """
-    params, idxs = aux.get_params_from_id(iden)
+    params, idxs = aux.get_params_from_id(iden, maxid)
     valid, overcontact = basic_param_eval(params,
                                           crit_potentials=crit_potentials[idxs[0]],
                                           omega1=omega1_grid[idxs[0], idxs[1]],
@@ -75,7 +75,6 @@ def eval_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_c
 
     if not valid:
         return
-
     if desired_morphology == 'detached' and overcontact:
         return
     elif desired_morphology == 'overcontact' and not overcontact:
@@ -118,18 +117,26 @@ def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0, desired_m
                                 once
     :return: None
     """
+
+    if desired_morphology not in ['detached', 'overcontact', 'all']:
+        raise ValueError(f'Invalid value of `desired_morphology`: {desired_morphology} argument. Use `detached`, '
+                         f'`overcontact` or `all`.')
+
     settings.configure(LOG_CONFIG='fit', MAX_DISCRETIZATION_FACTOR=8)
+    maxid = np.prod(
+        [config.Q_ARRAY.size, config.R_ARRAY.size ** 2, config.I_ARRAY.size, config.T_ARRAY.size ** 2])
     if db_name is not None:
         config.DATABASE_NAME = db_name
     phases = np.linspace(0, 1.0, num=config.N_POINTS, endpoint=False)
     # generating IDs of each possible combination
-    ids = np.arange(0, config.MAX_ID, dtype=np.int)
+
+    ids = np.arange(0, maxid, dtype=np.int)
     # randomizing calculation to fill the grid homogenously
     np.random.seed(42)
     np.random.shuffle(ids)
 
     # selecting subset to calculate (if you use multiple machines to spread the task
-    ids = ids[int(bottom_boundary * config.MAX_ID): int(top_boundary * config.MAX_ID)]
+    ids = ids[int(bottom_boundary * maxid): int(top_boundary * maxid)]
     maxiter = len(ids)
 
     crit_potentials = [BinarySystem.libration_potentials_static(1.0, q) for q in config.Q_ARRAY]
@@ -145,7 +152,7 @@ def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0, desired_m
     print(f'Breakpoint found {100.0*brkpoint/maxiter:.2f}%: {brkpoint}/{maxiter}')
     ids = ids[brkpoint:]
 
-    args = (crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, brkpoint, desired_morphology)
+    args = (crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, brkpoint, desired_morphology, maxid)
     multiproc.multiprocess_eval(ids, eval_grid_node, args)
 
 

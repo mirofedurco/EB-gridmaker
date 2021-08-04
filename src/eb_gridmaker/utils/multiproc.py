@@ -13,7 +13,7 @@ def multiprocess_eval(items, fn, args):
     :param args: tuple; arguments of curve evaluation function
     :return:
     """
-    chunksize = 1000
+    chunksize = 10000
     n_chunks = int(len(items) / chunksize + 1)
     for jj in range(n_chunks):
         print(f'Chunk {jj+1}/{n_chunks}.')

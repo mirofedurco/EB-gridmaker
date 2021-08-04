@@ -25,13 +25,14 @@ def generate_i(i_crit, step):
     return i_crit + step * (90 - i_crit)
 
 
-def get_params_from_id(id):
-    if id >= config.MAX_ID:
+def get_params_from_id(id, maxid):
+    order = [config.Q_ARRAY, config.R_ARRAY, config.R_ARRAY, config.T_ARRAY, config.T_ARRAY, config.I_ARRAY]
+    if id >= maxid:
         raise ValueError('ID is above maximum')
     remainder = float(id)
     result, indices = [], []
-    for ii, param in enumerate(config.PARAM_ORDER):
-        denominator = np.prod([item.size for item in config.PARAM_ORDER[ii+1:]]) if ii < 5 else 1
+    for ii, param in enumerate(order):
+        denominator = np.prod([item.size for item in order[ii+1:]]) if ii < 5 else 1
         remainder /= denominator
         remainder, index = modf(remainder)
         remainder *= denominator
