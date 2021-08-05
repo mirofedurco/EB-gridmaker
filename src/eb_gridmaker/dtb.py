@@ -178,31 +178,13 @@ def merge_databases(db_list, result_db):
     conn.commit()
 
     string1 = ', '.join(config.PARAMETER_COLUMNS[1:])
-    string2 = ', '.join(config.PASSBAND_COLLUMNS[1:])
+    string2 = ', '.join(config.PASSBAND_COLLUMNS)
     for fl in db_list:
         cursor.execute('ATTACH DATABASE ? AS db2', (fl,))
         cursor.execute(f'INSERT INTO parameters({string1}) SELECT {string1} FROM db2.parameters')
         cursor.execute(f'INSERT INTO curves({string2}) SELECT {string2} FROM db2.curves')
         conn.commit()
         cursor.execute('DETACH DATABASE db2')
-
-    # copyfile(db_list[0], result_db)
-    #
-    # conn = sqlite3.connect(result_db, detect_types=sqlite3.PARSE_DECLTYPES)
-    # # conn.row_factory = lambda cursor, row: row[0]
-    # cursor = conn.cursor()
-    # cursor.execute('DROP TABLE auxiliary')
-    #
-    # for fl in db_list[1:]:
-    #     cursor.execute('ATTACH DATABASE ? AS db2', (fl, ))
-    #     cursor.execute('INSERT INTO parameters SELECT * FROM db2.parameters')
-    #     cursor.execute('INSERT INTO curves SELECT * FROM db2.curves')
-    #     conn.commit()
-    #     cursor.execute('DETACH DATABASE db2')
-    #
-    # cursor.execute('SELECT id from parameters')
-    # ids = cursor.fetchall()
-    # cursor.executemany('UPDATE parameters SET id=?', ((val,) for val in myList))
 
     conn.commit()
     conn.close()

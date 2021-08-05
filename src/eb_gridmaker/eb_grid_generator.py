@@ -156,7 +156,7 @@ def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0, desired_m
 
 
 if __name__ == "__main__":
-    evaluate_grid('../../ceb_atlas2.db', 0.5, 1.0, desired_morphology='detached')
+    evaluate_grid('../../ceb_atlas1.db', 0.0, 0.5, desired_morphology='detached')
 
     # sz = aux.estimate_size(config.COUNTER)
     # print(f'Number of of expected nodes: {config.COUNTER*10} with size: {10*sz} Gb. \n')
