@@ -12,7 +12,7 @@ from .. utils.default_binary_model import DEFAULT_SYSTEM
 from .. import config
 
 
-def side_radius_potential_primary(radius, mass_ratio):
+def back_radius_potential_primary(radius, mass_ratio):
     """
     Returns potential for given side radius.
 
@@ -21,12 +21,12 @@ def side_radius_potential_primary(radius, mass_ratio):
     :return: float;
     """
     # (F, q, d, phi, theta)
-    args = (1.0, mass_ratio, 1.0, c.HALF_PI, c.HALF_PI)
+    args = (1.0, mass_ratio, 1.0, c.PI, c.HALF_PI)
     pot_args = pre_calculate_for_potential_value_primary(*args, return_as_tuple=True)
     return potential_value_primary(radius, mass_ratio, *pot_args)
 
 
-def side_radius_potential_secondary(radius, mass_ratio):
+def back_radius_potential_secondary(radius, mass_ratio):
     """
     Returns potential for given side radius.
 
@@ -35,7 +35,7 @@ def side_radius_potential_secondary(radius, mass_ratio):
     :return: float;
     """
     # (F, q, d, phi, theta)
-    args = (1.0, mass_ratio, 1.0, c.HALF_PI, c.HALF_PI)
+    args = (1.0, mass_ratio, 1.0, c.PI, c.HALF_PI)
     pot_args = pre_calculate_for_potential_value_secondary(*args, return_as_tuple=True)
     return potential_value_secondary(radius, mass_ratio, *pot_args)
 

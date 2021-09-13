@@ -141,8 +141,8 @@ def evaluate_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0, desired_m
     crit_potentials = [BinarySystem.libration_potentials_static(1.0, q) for q in config.Q_ARRAY]
 
     # pre-calculating potentials in grid
-    omega1_grid = aux.precalc_grid(config.Q_ARRAY, config.R_ARRAY, physics.side_radius_potential_primary)
-    omega2_grid = aux.precalc_grid(config.Q_ARRAY, config.R_ARRAY, physics.side_radius_potential_secondary)
+    omega1_grid = aux.precalc_grid(config.Q_ARRAY, config.R_ARRAY, physics.back_radius_potential_primary)
+    omega2_grid = aux.precalc_grid(config.Q_ARRAY, config.R_ARRAY, physics.back_radius_potential_secondary)
     # grid of critical inclinations
     i_crits = aux.precalc_grid(config.R_ARRAY, config.R_ARRAY, physics.critical_inclination)
 
