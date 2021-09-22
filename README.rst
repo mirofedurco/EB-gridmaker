@@ -114,10 +114,11 @@ code used for the extraction of the light curve::
 
     cursor = conn.cursor()
 
-    sql = "SELECT Bessell_V, Bessell_R id FROM curves"  # any valid SQL querry
+    sql = "id, SELECT Bessell_V, Bessell_R id FROM curves"  # any valid SQL querry
     cursor.execute(sql)
 
-    for ii, row in enumerate(cursor):
-        bessel_V = row[0]  # numpy.array containing light curve in V filter
-        bessel_R = row[0]  # numpy.array containing light curve in R filter
+    for row in cursor:
+        id = row[0]  # unique id of the model
+        bessel_V = row[1]  # numpy.array containing light curve in V filter
+        bessel_R = row[2]  # numpy.array containing light curve in R filter
 
