@@ -103,7 +103,7 @@ Retrieving the data
 -------------------
 
 Physical parameters stored in `parameters` table can be accessed using standard SQL queries. However, in case of light
-curves, the arrays are stored as numpy arrays stored in a custom format within the database. Here is the example of the
+curves, they are stored as numpy arrays in a custom format within the database. Here is the example of the
 code used for the extraction of the light curve::
 
     import sqlite3
