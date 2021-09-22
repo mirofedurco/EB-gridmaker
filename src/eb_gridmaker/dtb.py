@@ -1,5 +1,4 @@
 import sqlite3, os
-from shutil import copyfile
 
 import numpy as np
 

@@ -64,4 +64,60 @@ following command::
     merge_databases(db_files, res_file)
 
 which will create a single database containing a desired grid.
-    
+
+
+Structure of the database
+-------------------------
+
+Resulting database consists of two tables:
+
+    - ``parameters``: contains physical parameters of each system:
+
+        - ``id``: int; unique model identificator,
+        - ``mass_ratio``: float; M_2/M_1
+        - ``primary__surface_potential``, ``secondary__surface_potential``: float; modified Kopal surface potentials
+          of components
+        - ``primary__t_eff``, ``secondary__t_eff``: float; effective surface temperatures in Kelvins
+        - ``inclination``: float; orbital inclination in radians (pi/2 - edge on view, best visible eclipses
+        - ``critical_surface_potential``: float; value of modified Kopal potential for both components running troufh
+          L1 point,
+        - ``primary__equivalent_radius``, ``secondary__equivalent_radius``: float; radii in SMA units
+          (semi-major axis = 1) of spheres with the same volume as the component
+        - ``primary__equivalent_radius``, ``secondary__equivalent_radius``: float; parameter describing fullfilment of
+          the component's Roche lobe:
+
+            - filling factor < 0: component does not fill its Roche lobe
+            - filling factor = 0: component fills preciselly its Roche lobe
+            - 1 > filling factor > 0: component overflows its Roche lobe
+            - filling factor = 1: upper boundary of the filling factor, higher value would lead to
+                                the mass loss trough Lagrange point L2
+
+    - ``curves``:
+
+        - ``id``: int; unique model identificator,
+        - <passband_name>: numpy.array; light curves in the respective passband calculated calculated on linearly
+          spaced photomertric phases on <0, 1) interval (using np.linspace(0, 1, num_of_points))
+
+
+Retrieving the data
+-------------------
+
+Physical parameters stored in `parameters` table can be accessed using standard SQL queries. However, in case of light
+curves, the arrays are stored as numpy arrays stored in a custom format within the database. Here is the example of the
+code used for the extraction of the light curve::
+
+    import sqlite3
+    from eb_gridmaker.utils.sqlite_data_adapters import adapt_array, convert_array
+
+    db_file = '/path/to/dtb.db'
+    conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
+
+    cursor = conn.cursor()
+
+    sql = "SELECT Bessell_V, Bessell_R id FROM curves"  # any valid SQL querry
+    cursor.execute(sql)
+
+    for ii, row in enumerate(cursor):
+        bessel_V = row[0]  # numpy.array containing light curve in V filter
+        bessel_R = row[0]  # numpy.array containing light curve in R filter
+
