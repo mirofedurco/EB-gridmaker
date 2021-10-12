@@ -14,16 +14,12 @@ DEFAULT_SYSTEM = {
         "surface_potential": None,
         "synchronicity": 1.0,
         "t_eff": None,  # parameters can be provided in string representation consistent with astropy unit format
-        "gravity_darkening": None,
-        "albedo": None,
         "metallicity": 0.0
     },
     "secondary": {
         "surface_potential": None,
         "synchronicity": 1.0,
         "t_eff": None,
-        "gravity_darkening": None,
-        "albedo": None,
         "metallicity": 0.0
     }
 }
