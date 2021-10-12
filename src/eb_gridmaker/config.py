@@ -39,7 +39,7 @@ T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 
 # critical incliations are sampled
 SAMPLE_OVER_CRITICAL_INCLINATION = True
 # minimum inclination considered for evaluation
-MINIMUM_INCLINATION = np.radians(5)
+MINIMUM_INCLINATION = np.radians(10)
 
 PARAMETER_COLUMNS = (
     'id', 'mass_ratio',
