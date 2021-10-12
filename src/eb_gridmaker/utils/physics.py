@@ -117,12 +117,10 @@ def initialize_system(mass_ratio, r1, r2, t1, t2, inclination, omega1, omega2, o
         'semi_major_axis': sma, 'period': period,
     })
     params["primary"].update({
-        'surface_potential': omega1, 't_eff': t1,
-        'gravity_darkening': 1.0, 'albedo': 1.0,
+        'surface_potential': omega1, 't_eff': t1
     })
     params["secondary"].update({
-        'surface_potential': omega2, 't_eff': t2,
-        'gravity_darkening': 1.0, 'albedo': 1.0,
+        'surface_potential': omega2, 't_eff': t2
     })
 
     return BinarySystem.from_json(params)

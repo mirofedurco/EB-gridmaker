@@ -69,3 +69,5 @@ bs = BinarySystem(primary=primary, secondary=secondary, **params['system'])
 
 print(bs.primary.gravity_darkening, bs.secondary.gravity_darkening)
 print(bs.primary.albedo, bs.secondary.albedo)
+
+bs.plot.surface(colormap='temperature')
