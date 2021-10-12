@@ -31,8 +31,15 @@ MAX_DIFF_T_OVERCONTACT = 500  # maximum temperature difference between overconta
 Q_ARRAY = np.round(np.arange(0.1, 1.01, 0.1), 3)  # grid mass ratios
 R_ARRAY = np.round(np.arange(0.01, 1.0, 0.04), 6)  # grid of component's radii
 I_ARRAY = np.round(np.arange(0.0, 1.01, 0.1), 6)  # ranges of inclinations (i_min + I_ARRAY*(90-i_min))
-T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000), np.arange(25000, 50000, 5000)))  # t_eff of components
+# t_eff of components
+T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000), np.arange(25000, 50000, 5000)))
 # T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000)))  # t_eff of components/
+
+# if True inclinations are sampled in region above critical inclination where eclipses occur, otherwise, samples below
+# critical incliations are sampled
+SAMPLE_OVER_CRITICAL_INCLINATION = True
+# minimum inclination considered for evaluation
+MINIMUM_INCLINATION = np.radians(5)
 
 PARAMETER_COLUMNS = (
     'id', 'mass_ratio',

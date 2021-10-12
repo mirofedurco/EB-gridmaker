@@ -22,7 +22,9 @@ def generate_i(i_crit, step):
     :param step: float; (0.0, 1.0) inclination iteration parameter
     :return: float; inclination
     """
-    return i_crit + step * (90 - i_crit)
+    incl = i_crit + step * (90 - i_crit) if config.SAMPLE_OVER_CRITICAL_INCLINATION \
+        else config.MINIMUM_INCLINATION + step * (i_crit - config.MINIMUM_INCLINATION)
+    return incl
 
 
 def get_params_from_id(id, maxid):
