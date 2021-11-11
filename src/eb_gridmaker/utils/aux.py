@@ -1,6 +1,8 @@
 import numpy as np
 from math import modf
+from copy import copy
 
+from . default_single_model import DEFAULT_SYSTEM as S_DEFAULT_SINGLE_SYSTEM
 from .. import config
 
 
@@ -46,6 +48,30 @@ def get_params_from_id(id, maxid):
     return result, indices
 
 
+def draw_single_star_params():
+    """
+    Drawing parameters for single star system with spots. In case of rotational period,
+    only period/critical period was determined.
+
+    :return: Dict; dictionary used to initialize a SingleSystem
+    """
+    params = copy(S_DEFAULT_SINGLE_SYSTEM)
+    params["star"]["mass"] = np.random.uniform(config.M_RANGE[0], config.M_RANGE[1])
+    params["star"]["polar_log_g"] = np.random.uniform(config.LOG_G_RANGE[0], config.LOG_G_RANGE[1])
+    params["star"]["t_eff"] = np.random.uniform(config.T_EFF_RANGE[0], config.T_EFF_RANGE[1])
+    params["system"]["inclination"] = np.random.uniform(config.I_RANGE[0], config.I_RANGE[1])
+    params["system"]["rotation_period"] = np.random.uniform(config.P_RANGE[0], config.P_RANGE[1])
+
+    for spot in params["star"].get("spots", []):
+        spot["longitude"] = np.random.uniform(config.LONGITUDE_RANGE[0], config.LONGITUDE_RANGE[1])
+        spot["latitude"] = np.random.uniform(config.LATITUDE_RANGE[0], config.LATITUDE_RANGE[1])
+        spot["angular_radius"] = np.random.uniform(config.SPOT_RADIUS_RANGE[0], config.SPOT_RADIUS_RANGE[1])
+        t_diff = np.random.uniform(config.T_DIFF_SPOT_RANGE[0], config.T_DIFF_SPOT_RANGE[1])
+        spot["temperature_factor"] = (params["star"]["t_eff"] + t_diff) / params["star"]["t_eff"]
+
+    return params
+
+
 def precalc_grid(arr1, arr2, fn):
     """
     Aux function to calculate various grids of parameters.
@@ -74,8 +100,12 @@ def getattr_from_collumn_name(system, column_name):
     if len(colname_split) > 2:
         raise ValueError('Column name can contain only single `__` separator.')
     elif len(colname_split) > 1:
-        if colname_split[0] not in ['primary', 'secondary']:
+        if colname_split[0] not in ['primary', 'secondary', 'star']:
             raise ValueError('Only `primary` or `secondary` prefix can be in front of the `__` separator.')
+        if colname_split[1][:4] == 'spot':
+            star = getattr(system, colname_split[0])
+            spot = star.spots[int(colname_split[1][4])-1]
+            return getattr(spot, colname_split[1][6:])
         return getattr(getattr(system, colname_split[0]), colname_split[1])
     else:
         if colname_split[0] == 'critical_surface_potential':

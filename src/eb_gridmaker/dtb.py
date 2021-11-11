@@ -11,7 +11,7 @@ sqlite3.register_adapter(np.ndarray, adapt_array)
 sqlite3.register_converter("ARRAY", convert_array)
 
 
-def create_ceb_db(db_name):
+def create_ceb_db(db_name, param_columns, param_types):
     """
     Function creates dataframe for holding synthetic light curves and parameters of systems.
 
@@ -23,12 +23,12 @@ def create_ceb_db(db_name):
     db_args = (conn, cursor)
 
     # creating table of parameters
-    create_table('parameters', config.PARAMETER_COLUMNS, config.PARAMETER_TYPES,
+    create_table('parameters', param_columns, param_types,
                  *db_args, **dict(additive='PRIMARY KEY (id)'))
 
     # creating table for each curve
-    columns = config.PARAMETER_COLUMNS[:1] + config.PASSBAND_COLLUMNS
-    types = config.PARAMETER_TYPES[:1] + tuple('ARRAY' for _ in config.PASSBAND_COLLUMNS)
+    columns = param_columns[:1] + config.PASSBAND_COLLUMNS
+    types = param_types[:1] + tuple('ARRAY' for _ in config.PASSBAND_COLLUMNS)
     foreign_key = 'PRIMARY KEY (id), FOREIGN KEY (id) REFERENCES parameters (id)'
     create_table('curves', columns, types, *db_args, **dict(additive=foreign_key))
 
@@ -96,7 +96,7 @@ def update_last_id(last_id, *args):
     conn.commit()
 
 
-def insert_observation(db_name, observer, iden):
+def insert_observation(db_name, observer, iden, param_columns, param_types):
     """
     Create entry for the synthetic observation of given grid node with ID `iden` which will store system parameters in
     `parameters` table and normalized lightcurves in `curves` table.
@@ -104,6 +104,7 @@ def insert_observation(db_name, observer, iden):
     :param db_name: str;
     :param observer: elisa.Observer; observer instance with calculated light curves
     :param iden: str; node ID
+    :param param_columns: Tuple; names of smodel parameters
     :return:
     """
     bs = getattr(observer, '_system')
@@ -113,12 +114,12 @@ def insert_observation(db_name, observer, iden):
     db_args = (conn, cursor)
 
     # insert to parameters table
-    values = [iden, ] + [aux.getattr_from_collumn_name(bs, item) for item in config.PARAMETER_COLUMNS[1:]]
-    values = aux.typing(values, config.PARAMETER_TYPES)
-    insert_to_table('parameters', config.PARAMETER_COLUMNS, values, *db_args)
+    values = [iden, ] + [aux.getattr_from_collumn_name(bs, item) for item in param_columns[1:]]
+    values = aux.typing(values, param_types)
+    insert_to_table('parameters', param_columns, values, *db_args)
 
     # insert to curves table
-    columns = tuple(config.PARAMETER_COLUMNS[:1]) + config.PASSBAND_COLLUMNS
+    columns = tuple(param_columns[:1]) + config.PASSBAND_COLLUMNS
     values = [int(iden), ] + [observer.fluxes[p] for p in config.PASSBANDS]
     insert_to_table('curves', columns, values, *db_args)
 
@@ -154,12 +155,13 @@ def search_for_breakpoint(db_name, ids):
     conn.close()
 
 
-def merge_databases(db_list, result_db):
+def merge_databases(db_list, result_db, param_columns=config.PARAMETER_COLUMNS_BINARY):
     """
     Merges contents of databases calculated from different batches into a single database.
 
     :param db_list: list;
     :param result_db: str;
+    :param param_columns: Tuple; columns of model parameters
     :return: None
     """
     if type(db_list) not in [list, tuple]:
@@ -176,7 +178,7 @@ def merge_databases(db_list, result_db):
     cursor.execute('DROP TABLE auxiliary')
     conn.commit()
 
-    string1 = ', '.join(config.PARAMETER_COLUMNS[1:])
+    string1 = ', '.join(param_columns[1:])
     string2 = ', '.join(config.PASSBAND_COLLUMNS)
     for fl in db_list:
         cursor.execute('ATTACH DATABASE ? AS db2', (fl,))
@@ -190,6 +192,14 @@ def merge_databases(db_list, result_db):
 
 
 def get_observations(db_name, ids, passbands):
+    """
+    Returns observations with ids and in given passbands.
+
+    :param db_name:
+    :param ids:
+    :param passbands:
+    :return:
+    """
     invalid_passbands = [passband for passband in passbands if passband not in config.PASSBAND_COLLUMN_MAP.values()]
     if len(invalid_passbands) > 0:
         raise ValueError(f'Invalid passbands: {invalid_passbands}.')

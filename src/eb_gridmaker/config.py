@@ -23,6 +23,7 @@ PASSBANDS = [
     'TESS',
 ]
 
+# _____________CONFIGURATIONS_FOR_GRID_SAMPLING________________
 T_MAX_OVERCONTACT = 8000  # maximum allowed temperature of the overcontact system components
 MAX_DIFF_T_OVERCONTACT = 500  # maximum temperature difference between overcontact components
 
@@ -41,7 +42,7 @@ SAMPLE_OVER_CRITICAL_INCLINATION = True
 # minimum inclination considered for evaluation
 MINIMUM_INCLINATION = np.radians(10)
 
-PARAMETER_COLUMNS = (
+PARAMETER_COLUMNS_BINARY = (
     'id', 'mass_ratio',
     'primary__surface_potential', 'secondary__surface_potential',
     'primary__t_eff', 'secondary__t_eff',
@@ -50,7 +51,7 @@ PARAMETER_COLUMNS = (
     'primary__filling_factor', 'secondary__filling_factor',
 )
 
-PARAMETER_TYPES = (
+PARAMETER_TYPES_BINARY = (
     'INTEGER NOT NULL', 'REAL',
     'REAL', 'REAL',
     'INTEGER', 'INTEGER',
@@ -58,6 +59,45 @@ PARAMETER_TYPES = (
     'REAL', 'REAL',
     'REAL', 'REAL',
 )
+
+# ____________CONFIGURATIONS_FOR_SINGLE_RANDOM_SAMPLING_____________
+M_RANGE = [0.1, 10]  # mass
+LOG_G_RANGE = [1.0, 5.0]  # log surface gravity (cgs)
+T_EFF_RANGE = [3500, 50000]  # effective temperature
+I_RANGE = [0, 90]  # inclination range
+P_RANGE = [0, 100]  # rotation period
+
+PARAMETER_COLUMNS_SINGLE = (
+    'id', 'star__mass',
+    'star__t_eff',
+    'inclination',
+    'rotation_period',
+    'star__polar_log_g',
+    'star__equivalent_radius',
+    'star__spot1_longitude',
+    'star__spot1_latitude',
+    'star__spot1_angular_radius',
+    'star__spot1_temperature_factor'
+)
+
+PARAMETER_TYPES_SINGLE = (
+    'INTEGER NOT NULL', 'REAL',
+    'REAL',
+    'REAL',
+    'REAL',
+    'REAL',
+    'REAL',
+    'REAL',
+    'REAL',
+    'REAL',
+    'REAL',
+)
+
+# ____________CONFIGURATIONS_FOR_SPOT_SAMPLING_____________
+LONGITUDE_RANGE = [0, 360]
+LATITUDE_RANGE = [0, 360]
+SPOT_RADIUS_RANGE = [0, 90]
+T_DIFF_SPOT_RANGE = [-2000, 2000]
 
 # mappping of elisa passbands with db column names
 PASSBAND_COLLUMN_MAP = {
