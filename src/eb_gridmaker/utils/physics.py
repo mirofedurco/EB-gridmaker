@@ -126,14 +126,14 @@ def initialize_system(mass_ratio, r1, r2, t1, t2, inclination, omega1, omega2, o
     return BinarySystem.from_json(params)
 
 
-def inverse_potential(potential, mass_ratio):
+def invert_potential(potential, mass_ratio):
     return potential / mass_ratio + 0.5 * (mass_ratio - 1) / mass_ratio
 
 
 def switch_components(mass_ratio, r1, r2, t1, t2, inclination, omega1, omega2):
     def inversion():
-        new_omega_1 = inverse_potential(omega2, mass_ratio)
-        new_omega_2 = inverse_potential(omega1, mass_ratio)
+        new_omega_1 = invert_potential(omega2, mass_ratio)
+        new_omega_2 = invert_potential(omega1, mass_ratio)
 
         return [1.0 / mass_ratio, r2, r1, t2, t1, inclination], new_omega_1, new_omega_2
 
