@@ -1,6 +1,8 @@
 import os
 import numpy as np
 
+from elisa.const import TEMPERATURE_LIST_LD
+
 DATABASE_NAME = 'ceb_atlas.db'
 # NUMBER_OF_PROCESSES = 1
 NUMBER_OF_PROCESSES = os.cpu_count()
@@ -23,7 +25,7 @@ PASSBANDS = [
     'TESS',
 ]
 
-# _____________CONFIGURATIONS_FOR_GRID_SAMPLING________________
+# _____________CONFIGURATIONS_FOR_CIRCULAR_ORBIT_GRID_SAMPLING________________
 T_MAX_OVERCONTACT = 8000  # maximum allowed temperature of the overcontact system components
 MAX_DIFF_T_OVERCONTACT = 500  # maximum temperature difference between overcontact components
 
@@ -64,6 +66,7 @@ PARAMETER_TYPES_BINARY = (
 M_RANGE = [0.1, 10]  # mass
 LOG_G_RANGE = [1.0, 5.0]  # log surface gravity (cgs)
 T_EFF_RANGE = [3500, 50000]  # effective temperature
+T_CHOICES = TEMPERATURE_LIST_LD
 I_RANGE = [0, 90]  # inclination range
 P_RANGE = [0, 100]  # rotation period
 
@@ -95,7 +98,7 @@ PARAMETER_TYPES_SINGLE = (
 
 # ____________CONFIGURATIONS_FOR_SPOT_SAMPLING_____________
 LONGITUDE_RANGE = [0, 360]
-LATITUDE_RANGE = [0, 360]
+LATITUDE_RANGE = [0, 180]
 SPOT_RADIUS_RANGE = [0, 90]
 T_DIFF_SPOT_RANGE = [-2000, 2000]
 
@@ -115,6 +118,37 @@ PASSBAND_COLLUMN_MAP = {
     'GaiaDR2': 'GaiaDR2',
     'TESS': 'TESS',
 }
+
+# ____________CONFIGURATIONS_FOR_ECCENTRIC_ORBIT_RANDOM_SAMPLING_____________
+Q_RANGE = (0.05, 1.0)  # grid mass ratios
+R_RANGE = (0.01, 1.0)  # grid of component's radii
+I_FACTOR_RANGE = (0.0, 1.0)  # ranges of inclinations (i_min + I_ARRAY*(90-i_min))
+E_RANGE = (0.0, 1.0)
+ARG0_RANGE = (0, 360.0)
+P_CHOICES = np.concatenate((
+    np.round(np.arange(0.1, 1.00, 0.1), 2),
+    np.round(np.arange(1.0, 3.0, 0.2), 2),
+    np.round(np.arange(3.0, 10.0, 0.5), 2),
+    np.round(np.arange(10.0, 30.0, 2), 2),
+))
+
+PARAMETER_COLUMNS_ECCENTRIC = (
+    'id', 'mass_ratio',
+    'primary__surface_potential', 'secondary__surface_potential',
+    'primary__t_eff', 'secondary__t_eff',
+    'inclination', 'critical_surface_potential', 'overcontact',
+    'primary__equivalent_radius', 'secondary__equivalent_radius',
+    'eccentricity', 'argument_of_periastron'
+)
+
+PARAMETER_TYPES_ECCENTRIC = (
+    'INTEGER NOT NULL', 'REAL',
+    'REAL', 'REAL',
+    'INTEGER', 'INTEGER',
+    'REAL', 'REAL', 'INTEGER',
+    'REAL', 'REAL',
+    'REAL', 'REAL',
+)
 
 PASSBAND_COLLUMNS = tuple(PASSBAND_COLLUMN_MAP[p] for p in PASSBANDS)
 

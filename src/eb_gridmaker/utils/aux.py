@@ -3,6 +3,7 @@ from math import modf
 from copy import copy
 
 from . default_single_model import DEFAULT_SYSTEM as S_DEFAULT_SINGLE_SYSTEM
+from . default_binary_model import DEFAULT_SYSTEM as DEFAULT_BINARY_SYSTEM
 from .. import config
 
 
@@ -58,7 +59,8 @@ def draw_single_star_params():
     params = copy(S_DEFAULT_SINGLE_SYSTEM)
     params["star"]["mass"] = np.random.uniform(config.M_RANGE[0], config.M_RANGE[1])
     params["star"]["polar_log_g"] = np.random.uniform(config.LOG_G_RANGE[0], config.LOG_G_RANGE[1])
-    params["star"]["t_eff"] = np.random.uniform(config.T_EFF_RANGE[0], config.T_EFF_RANGE[1])
+    # params["star"]["t_eff"] = np.random.uniform(config.T_EFF_RANGE[0], config.T_EFF_RANGE[1])
+    params["star"]["t_eff"] = np.random.choice(config.T_CHOICES)
     params["system"]["inclination"] = np.random.uniform(config.I_RANGE[0], config.I_RANGE[1])
     params["system"]["rotation_period"] = np.random.uniform(config.P_RANGE[0], config.P_RANGE[1])
 
@@ -70,6 +72,11 @@ def draw_single_star_params():
         spot["temperature_factor"] = (params["star"]["t_eff"] + t_diff) / params["star"]["t_eff"]
 
     return params
+
+
+def draw_eccentric_system_params():
+    params = copy(DEFAULT_BINARY_SYSTEM)
+    params["system"]["period"] = np.random.uniform(config.M_RANGE[0], config.M_RANGE[1])
 
 
 def precalc_grid(arr1, arr2, fn):

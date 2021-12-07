@@ -73,7 +73,6 @@ def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
         params = aux.draw_eccentric_system_params()
 
 
-
 def eccentric_system_random_sampling(db_name=None, number_of_samples=1e4):
     if db_name is not None:
         config.DATABASE_NAME = db_name
