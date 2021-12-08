@@ -12,21 +12,23 @@ from .. utils.default_binary_model import DEFAULT_SYSTEM
 from .. import config
 
 
-def back_radius_potential_primary(radius, mass_ratio):
+def back_radius_potential_primary(radius, mass_ratio, synchronicity=1.0, distance=1.0):
     """
     Returns potential for given side radius.
 
+    :param distance: float;
+    :param synchronicity: float;
     :param radius: float;
     :param mass_ratio: float;
     :return: float;
     """
     # (F, q, d, phi, theta)
-    args = (1.0, mass_ratio, 1.0, c.PI, c.HALF_PI)
+    args = (synchronicity, mass_ratio, distance, c.PI, c.HALF_PI)
     pot_args = pre_calculate_for_potential_value_primary(*args, return_as_tuple=True)
     return potential_value_primary(radius, mass_ratio, *pot_args)
 
 
-def back_radius_potential_secondary(radius, mass_ratio):
+def back_radius_potential_secondary(radius, mass_ratio, synchronicity=1.0, distance=1.0):
     """
     Returns potential for given side radius.
 
@@ -35,7 +37,7 @@ def back_radius_potential_secondary(radius, mass_ratio):
     :return: float;
     """
     # (F, q, d, phi, theta)
-    args = (1.0, mass_ratio, 1.0, c.PI, c.HALF_PI)
+    args = (synchronicity, mass_ratio, distance, c.PI, c.HALF_PI)
     pot_args = pre_calculate_for_potential_value_secondary(*args, return_as_tuple=True)
     return potential_value_secondary(radius, mass_ratio, *pot_args)
 
@@ -50,21 +52,26 @@ def secondary_side_radius(mass_ratio, surface_potential):
     return calculate_side_radius(1.0, mass_ratio, 1.0, surface_potential, 'secondary')
 
 
-def critical_inclination(r1, r2):
+def critical_inclination(r1, r2, distance=None):
     """
     Returns minimum inclination for occurence of eclipses.
 
     :param r1: float;
     :param r2: float;
-    :return:
+    :param distance: float;
+    :return: Union[float; numpy.array]
     """
     summ = r1+r2
     if np.isscalar(summ):
-        return np.degrees(np.arccos(r1+r2))
+        distance = 1.0 if distance is None else float(distance)
+        return np.degrees(np.arccos((r1+r2)/distance))
     else:
+        distance = np.full(summ.shape, 1.0) if distance is None else \
+            (np.full(summ.shape, distance) if np.isscalar(distance) else distance)
         result = np.full(summ.shape, np.nan)
+        summ = summ / distance
         mask = summ < 1
-        result[mask] = np.degrees(np.arccos(summ[mask]))
+        result[mask] = np.degrees(np.arccos(summ[mask]/distance[mask]))
         return result
 
 

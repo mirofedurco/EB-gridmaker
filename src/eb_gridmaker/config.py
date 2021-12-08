@@ -120,17 +120,10 @@ PASSBAND_COLLUMN_MAP = {
 }
 
 # ____________CONFIGURATIONS_FOR_ECCENTRIC_ORBIT_RANDOM_SAMPLING_____________
-Q_RANGE = (0.05, 1.0)  # grid mass ratios
-R_RANGE = (0.01, 1.0)  # grid of component's radii
+R_RANGE = (0.01, 0.3)  # grid of component's radii
 I_FACTOR_RANGE = (0.0, 1.0)  # ranges of inclinations (i_min + I_ARRAY*(90-i_min))
 E_RANGE = (0.0, 1.0)
 ARG0_RANGE = (0, 360.0)
-P_CHOICES = np.concatenate((
-    np.round(np.arange(0.1, 1.00, 0.1), 2),
-    np.round(np.arange(1.0, 3.0, 0.2), 2),
-    np.round(np.arange(3.0, 10.0, 0.5), 2),
-    np.round(np.arange(10.0, 30.0, 2), 2),
-))
 
 PARAMETER_COLUMNS_ECCENTRIC = (
     'id', 'mass_ratio',
@@ -147,7 +140,7 @@ PARAMETER_TYPES_ECCENTRIC = (
     'INTEGER', 'INTEGER',
     'REAL', 'REAL', 'INTEGER',
     'REAL', 'REAL',
-    'REAL', 'REAL',
+    'REAL', 'INTEGER',
 )
 
 PASSBAND_COLLUMNS = tuple(PASSBAND_COLLUMN_MAP[p] for p in PASSBANDS)

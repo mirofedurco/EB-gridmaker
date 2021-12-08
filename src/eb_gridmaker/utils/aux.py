@@ -4,6 +4,10 @@ from copy import copy
 
 from . default_single_model import DEFAULT_SYSTEM as S_DEFAULT_SINGLE_SYSTEM
 from . default_binary_model import DEFAULT_SYSTEM as DEFAULT_BINARY_SYSTEM
+from . physics import (
+    back_radius_potential_primary,
+    back_radius_potential_secondary
+)
 from .. import config
 
 
@@ -75,8 +79,51 @@ def draw_single_star_params():
 
 
 def draw_eccentric_system_params():
+    """
+    Draw random parameters for sampling of eccentric EBs.
+
+    :return: Tuple(dict, tuple); list of binary system parameters with random parameters included,
+                                 tuple of equivalent radii.
+    """
     params = copy(DEFAULT_BINARY_SYSTEM)
-    params["system"]["period"] = np.random.uniform(config.M_RANGE[0], config.M_RANGE[1])
+    params["system"]["inclination"] = 90     # placeholder
+    params["system"]["argument_of_periastron"] = np.random.randint(config.ARG0_RANGE[0], config.ARG0_RANGE[1], dtype=int)
+    params["system"]["eccentricity"] = np.random.uniform(config.E_RANGE[0], config.E_RANGE[1])
+    params["system"]["mass_ratio"] = np.random.choice(config.Q_ARRAY)
+
+    for component in ['primary', 'secondary']:
+        params[component]['t_eff'] = np.random.choice(config.T_CHOICES)
+
+    radii = draw_radii()
+
+    return params, radii
+
+
+def draw_radii():
+    """
+    Draw equivalent radii of the components
+    :return:
+    """
+    while True:
+        r1 = np.round(np.random.exponential(0.15), 2) + config.R_RANGE[0]
+        r2 = np.round(np.random.exponential(0.15), 2) + config.R_RANGE[0]
+
+        if r1 < 0.5 and r2 < 0.5:
+            break
+
+    return r1, r2
+
+
+def assign_eccentric_system_params(params, radii):
+    eccentricity = params["system"]["eccentricity"]
+    synchronicity = (1+eccentricity)**2 / (1-eccentricity**2)**1.5
+    pot_fns = {"primary": back_radius_potential_primary, "secondary": back_radius_potential_secondary}
+    for ii, component in enumerate(['primary', 'secondary']):
+        params[component]['synchronicity'] = synchronicity
+        args = (radii[ii], params["system"]["mass_ratio"], synchronicity, 1-eccentricity)
+        params[component]['surface_potential'] = pot_fns[component](*args)
+
+    return params
 
 
 def precalc_grid(arr1, arr2, fn):

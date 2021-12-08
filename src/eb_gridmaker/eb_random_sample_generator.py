@@ -2,8 +2,8 @@ import numpy as np
 
 from eb_gridmaker import dtb, config
 from eb_gridmaker.utils import aux, multiproc
-from elisa import SingleSystem, Observer
-from elisa.base.error import LimbDarkeningError, AtmosphereError
+from elisa import SingleSystem, BinarySystem, Observer
+from elisa.base.error import LimbDarkeningError, AtmosphereError, MorphologyError
 
 
 def eval_single_grid_node(iden, counter, phases, maxiter, start_index):
@@ -70,7 +70,13 @@ def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
     aug_counter = counter + start_index
     print(f'Processing node: {aug_counter}/{maxiter}, {100.0 * aug_counter / maxiter:.2f}%')
     while True:
-        params = aux.draw_eccentric_system_params()
+        args = aux.draw_eccentric_system_params()
+        params = aux.assign_eccentric_system_params(*args)
+
+        try:
+            bs = BinarySystem.from_json(params)
+        except MorphologyError as e:
+            continue
 
 
 def eccentric_system_random_sampling(db_name=None, number_of_samples=1e4):
@@ -105,7 +111,7 @@ def random_sampling(db_name=None, desired_morphology='all', number_of_samples=1e
     elif desired_morphology in ['single_spotty']:
         spotty_single_system_random_sampling(db_name, number_of_samples=number_of_samples)
     elif desired_morphology in ['eccentric']:
-        eccentric_system_random_sampling()
+        eccentric_system_random_sampling(db_name, number_of_samples=number_of_samples)
     else:
         raise ValueError(f'Unknown morphology: {desired_morphology}. '
                          f'List of available morphologies: `all`, `detached` - detached binaries on circular orbit, '
@@ -114,4 +120,5 @@ def random_sampling(db_name=None, desired_morphology='all', number_of_samples=1e
 
 if __name__ == "__main__":
     config.NUMBER_OF_PROCESSES = 1
-    random_sampling('../../random.db', desired_morphology='single_spotty', number_of_samples=10)
+    # random_sampling('../../random.db', desired_morphology='single_spotty', number_of_samples=10)
+    random_sampling('../../random.db', desired_morphology='eccentric', number_of_samples=10)
