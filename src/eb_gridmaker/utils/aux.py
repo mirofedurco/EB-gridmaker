@@ -38,19 +38,17 @@ def get_params_from_id(id, maxid):
     order = [config.Q_ARRAY, config.R_ARRAY, config.R_ARRAY, config.T_ARRAY, config.T_ARRAY, config.I_ARRAY]
     if id >= maxid:
         raise ValueError('ID is above maximum')
-    remainder = float(id)
     result, indices = [], []
-    for ii, param in enumerate(order):
-        denominator = np.prod([item.size for item in order[ii+1:]]) if ii < 5 else 1
-        remainder /= denominator
-        remainder, index = modf(remainder)
-        remainder *= denominator
 
-        index = int(index)
+    remainder = int(id)
+    for ii, param in enumerate(order[::-1]):
+        divisor = len(param)
+
+        remainder, index = divmod(remainder, divisor)
         result.append(param[index])
         indices.append(index)
 
-    return result, indices
+    return result[::-1], indices[::-1]
 
 
 def draw_single_star_params():
