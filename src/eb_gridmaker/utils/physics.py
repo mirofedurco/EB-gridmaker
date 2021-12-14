@@ -151,5 +151,14 @@ def switch_components(mass_ratio, r1, r2, t1, t2, inclination, omega1, omega2):
 
 
 def return_closest_distance(binary):
+    """
+    Returns the closest component distance during eclipses.
 
-    pass
+    :param binary: BinarySystem;
+    :return: float; distance in SMA units
+    """
+    conjunctions = binary.orbit.conjunctions
+    conj_phases = [conj['true_phase'] for conj in conjunctions.values()]
+    distances = binary.calculate_orbital_motion(conj_phases, return_nparray=True, calculate_from='phase')[:, 1]
+
+    return distances.min()

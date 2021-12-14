@@ -2,7 +2,7 @@ import numpy as np
 
 from eb_gridmaker import dtb, config
 from eb_gridmaker.utils import aux, multiproc
-from elisa import SingleSystem, BinarySystem, Observer
+from elisa import SingleSystem, BinarySystem, Observer, settings
 from elisa.base.error import LimbDarkeningError, AtmosphereError, MorphologyError
 
 
@@ -67,8 +67,6 @@ def eval_single_grid_node(iden, counter, phases, maxiter, start_index):
 
 
 def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
-    aug_counter = counter + start_index
-    print(f'Processing node: {aug_counter}/{maxiter}, {100.0 * aug_counter / maxiter:.2f}%')
     while True:
         args = aux.draw_eccentric_system_params()
         params = aux.assign_eccentric_system_params(*args)
@@ -76,12 +74,16 @@ def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
         try:
             bs = BinarySystem.from_json(params)
         except MorphologyError as e:
-            print(e)
+            # print(e)
             continue
 
-        # params = draw_inclination
+        try:
+            setattr(bs, 'inclination', np.radians(aux.draw_inclination(binary=bs)))
+            bs.init()
 
-        o = Observer(passband=config.PASSBANDS, system=bs)
+            o = Observer(passband=config.PASSBANDS, system=bs)
+        except Exception as e:
+            raise ValueError(e)
 
         try:
             o.lc(phases=phases, normalize=True)
@@ -93,6 +95,9 @@ def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
         dtb.insert_observation(
             config.DATABASE_NAME, o, iden, config.PARAMETER_COLUMNS_ECCENTRIC, config.PARAMETER_TYPES_ECCENTRIC
         )
+
+        aug_counter = counter + start_index + 1
+        print(f'Node processed: {aug_counter}/{maxiter}, {100.0 * aug_counter / maxiter:.2f}%')
         break
 
 
@@ -136,6 +141,7 @@ def random_sampling(db_name=None, desired_morphology='all', number_of_samples=1e
 
 
 if __name__ == "__main__":
+    settings.LOG_CONFIG = 'fit'
     config.NUMBER_OF_PROCESSES = 1
     # random_sampling('../../random.db', desired_morphology='single_spotty', number_of_samples=10)
     random_sampling('../../random.db', desired_morphology='eccentric', number_of_samples=10)

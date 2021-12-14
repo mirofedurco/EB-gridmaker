@@ -7,7 +7,9 @@ from . default_binary_model import DEFAULT_SYSTEM as DEFAULT_BINARY_SYSTEM
 from . physics import (
     back_radius_potential_primary,
     back_radius_potential_secondary,
-    correct_sma
+    correct_sma,
+    return_closest_distance,
+    critical_inclination
 )
 from .. import config
 
@@ -33,6 +35,20 @@ def generate_i(i_crit, step):
     incl = i_crit + step * (90 - i_crit) if config.SAMPLE_OVER_CRITICAL_INCLINATION \
         else config.MINIMUM_INCLINATION + step * (i_crit - config.MINIMUM_INCLINATION)
     return incl
+
+
+def draw_inclination(binary):
+    """
+    Generate random inclinations below or above critical inclinations.
+
+    :param binary: BinarySystem;
+    :return:
+    """
+    conj_distance = return_closest_distance(binary)
+    i_crit = critical_inclination(binary.primary.polar_radius, binary.secondary.polar_radius, distance=conj_distance)
+
+    step = np.random.uniform(0.0, 1.0)
+    return generate_i(i_crit, step)
 
 
 def get_params_from_id(id):
