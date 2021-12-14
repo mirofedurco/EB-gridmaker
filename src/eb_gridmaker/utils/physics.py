@@ -149,3 +149,7 @@ def switch_components(mass_ratio, r1, r2, t1, t2, inclination, omega1, omega2):
 
     return inversion()
 
+
+def return_closest_distance(binary):
+
+    pass

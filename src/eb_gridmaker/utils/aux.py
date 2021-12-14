@@ -6,7 +6,8 @@ from . default_single_model import DEFAULT_SYSTEM as S_DEFAULT_SINGLE_SYSTEM
 from . default_binary_model import DEFAULT_SYSTEM as DEFAULT_BINARY_SYSTEM
 from . physics import (
     back_radius_potential_primary,
-    back_radius_potential_secondary
+    back_radius_potential_secondary,
+    correct_sma
 )
 from .. import config
 
@@ -34,21 +35,22 @@ def generate_i(i_crit, step):
     return incl
 
 
-def get_params_from_id(id, maxid):
-    order = [config.Q_ARRAY, config.R_ARRAY, config.R_ARRAY, config.T_ARRAY, config.T_ARRAY, config.I_ARRAY]
-    if id >= maxid:
+def get_params_from_id(id):
+    if id >= config.CUMULATIVE_PRODUCT[-1]:
         raise ValueError('ID is above maximum')
     result, indices = [], []
 
-    remainder = int(id)
-    for ii, param in enumerate(order[::-1]):
-        divisor = len(param)
+    cumulative_product = config.CUMULATIVE_PRODUCT[:-1]
+    n_hyper_cube = np.concatenate((cumulative_product[::-1], [1, ]))
 
-        remainder, index = divmod(remainder, divisor)
+    remainder = copy(id)
+    for ii, param in enumerate(config.SAMPLING_ORDER):
+        index, remainder = divmod(remainder, n_hyper_cube[ii])
+
         result.append(param[index])
         indices.append(index)
 
-    return result[::-1], indices[::-1]
+    return result, indices
 
 
 def draw_single_star_params():
@@ -113,6 +115,13 @@ def draw_radii():
 
 
 def assign_eccentric_system_params(params, radii):
+    """
+    Assign synchrinicities, surface potentials, semi-major axis and mass ratio.
+
+    :param params: Dict; system parameters in JSON format
+    :param radii: Tuple; back radii
+    :return: Dict; parameters
+    """
     eccentricity = params["system"]["eccentricity"]
     synchronicity = (1+eccentricity)**2 / (1-eccentricity**2)**1.5
     pot_fns = {"primary": back_radius_potential_primary, "secondary": back_radius_potential_secondary}
@@ -120,6 +129,9 @@ def assign_eccentric_system_params(params, radii):
         params[component]['synchronicity'] = synchronicity
         args = (radii[ii], params["system"]["mass_ratio"], synchronicity, 1-eccentricity)
         params[component]['surface_potential'] = pot_fns[component](*args)
+
+    params['system']['semi_major_axis'], params['system']['period'] = \
+        correct_sma(params['system']['mass_ratio'], radii[0], radii[1])
 
     return params
 
@@ -173,4 +185,6 @@ def typing(values, types):
     type_map = {'INTEGER': int, 'INTEGER NOT NULL': int, 'REAL': float, 'TEXT': str}
     for ii, val in enumerate(values):
         values[ii] = type_map[types[ii]](val)
+        values[ii] = np.round(values[ii], 5) if types[ii] == 'REAL' else values[ii]
+
     return values

@@ -6,6 +6,30 @@ from elisa import SingleSystem, BinarySystem, Observer
 from elisa.base.error import LimbDarkeningError, AtmosphereError, MorphologyError
 
 
+def spotty_single_system_random_sampling(db_name=None, number_of_samples=1e4):
+    """
+    Producing sample of spotty single system models generated randomly in given parameter space.
+
+    :param db_name: str;
+    :param number_of_samples: int;
+    :return: None;
+    """
+    if db_name is not None:
+        config.DATABASE_NAME = db_name
+    phases = np.linspace(0, 1.0, num=config.N_POINTS, endpoint=False)
+
+    # generating IDs of each possible combination
+    ids = np.arange(0, number_of_samples, dtype=np.int)
+
+    dtb.create_ceb_db(config.DATABASE_NAME, config.PARAMETER_COLUMNS_SINGLE, config.PARAMETER_TYPES_SINGLE)
+    brkpoint = dtb.search_for_breakpoint(config.DATABASE_NAME, ids)
+    print(f'Breakpoint found {100.0 * brkpoint / number_of_samples:.2f}%: {brkpoint}/{number_of_samples}')
+    ids = ids[brkpoint:]
+
+    args = (phases, number_of_samples, brkpoint, )
+    multiproc.multiprocess_eval(ids, eval_single_grid_node, args)
+
+
 def eval_single_grid_node(iden, counter, phases, maxiter, start_index):
     """
     Evaluating randomly generated spotty single system model.
@@ -42,30 +66,6 @@ def eval_single_grid_node(iden, counter, phases, maxiter, start_index):
         break
 
 
-def spotty_single_system_random_sampling(db_name=None, number_of_samples=1e4):
-    """
-    Producing sample of spotty single system models generated randomly in given parameter space.
-
-    :param db_name: str;
-    :param number_of_samples: int;
-    :return: None;
-    """
-    if db_name is not None:
-        config.DATABASE_NAME = db_name
-    phases = np.linspace(0, 1.0, num=config.N_POINTS, endpoint=False)
-
-    # generating IDs of each possible combination
-    ids = np.arange(0, number_of_samples, dtype=np.int)
-
-    dtb.create_ceb_db(config.DATABASE_NAME, config.PARAMETER_COLUMNS_SINGLE, config.PARAMETER_TYPES_SINGLE)
-    brkpoint = dtb.search_for_breakpoint(config.DATABASE_NAME, ids)
-    print(f'Breakpoint found {100.0 * brkpoint / number_of_samples:.2f}%: {brkpoint}/{number_of_samples}')
-    ids = ids[brkpoint:]
-
-    args = (phases, number_of_samples, brkpoint, )
-    multiproc.multiprocess_eval(ids, eval_single_grid_node, args)
-
-
 def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
     aug_counter = counter + start_index
     print(f'Processing node: {aug_counter}/{maxiter}, {100.0 * aug_counter / maxiter:.2f}%')
@@ -76,7 +76,24 @@ def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
         try:
             bs = BinarySystem.from_json(params)
         except MorphologyError as e:
+            print(e)
             continue
+
+        # params = draw_inclination
+
+        o = Observer(passband=config.PASSBANDS, system=bs)
+
+        try:
+            o.lc(phases=phases, normalize=True)
+            # o.plot.lc()
+        except (LimbDarkeningError, AtmosphereError) as e:
+            # print(f'Parameters: {params} produced system outside grid coverage.')
+            continue
+
+        dtb.insert_observation(
+            config.DATABASE_NAME, o, iden, config.PARAMETER_COLUMNS_ECCENTRIC, config.PARAMETER_TYPES_ECCENTRIC
+        )
+        break
 
 
 def eccentric_system_random_sampling(db_name=None, number_of_samples=1e4):

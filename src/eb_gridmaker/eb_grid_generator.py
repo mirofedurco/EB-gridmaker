@@ -50,7 +50,7 @@ def basic_param_eval(params, crit_potentials=None, omega1=None, omega2=None):
 
 
 def eval_binary_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter,
-                          start_index, desired_morphology, maxid):
+                          start_index, desired_morphology):
     """
     Evaluating binary system located on grid node defined by its unique ID.
 
@@ -66,7 +66,7 @@ def eval_binary_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_gr
     :param start_index: int; number of iterations already calculated before interruption
     :return: None
     """
-    params, idxs = aux.get_params_from_id(iden, maxid)
+    params, idxs = aux.get_params_from_id(iden)
     valid, overcontact = basic_param_eval(params,
                                           crit_potentials=crit_potentials[idxs[0]],
                                           omega1=omega1_grid[idxs[0], idxs[1]],
@@ -79,8 +79,6 @@ def eval_binary_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_gr
     elif desired_morphology == 'overcontact' and not overcontact:
         return
 
-    aug_counter = counter + start_index
-    print(f'Processing node: {aug_counter}/{maxiter}, {100.0*aug_counter/maxiter:.2f}%')
     omega1 = omega1_grid[idxs[0], idxs[1]]
     omega2 = omega1 if overcontact else omega2_grid[idxs[0], idxs[2]]
 
@@ -102,6 +100,8 @@ def eval_binary_grid_node(iden, counter, crit_potentials, omega1_grid, omega2_gr
     dtb.insert_observation(
         config.DATABASE_NAME, o, iden, config.PARAMETER_COLUMNS_BINARY, config.PARAMETER_TYPES_BINARY
     )
+    aug_counter = counter + start_index
+    print(f'Node processed: {aug_counter}/{maxiter}, {100.0*aug_counter/maxiter:.2f}%')
 
 
 def evaluate_binary_on_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0, desired_morphology='all'):
@@ -114,8 +114,8 @@ def evaluate_binary_on_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0,
     :param desired_morphology: str;
     :return: None;
     """
-    maxid = np.prod(
-        [config.Q_ARRAY.size, config.R_ARRAY.size ** 2, config.I_ARRAY.size, config.T_ARRAY.size ** 2])
+    config.CUMULATIVE_PRODUCT = np.cumprod([o.size for o in reversed(config.SAMPLING_ORDER)])
+    maxid = config.CUMULATIVE_PRODUCT[-1]
 
     if db_name is not None:
         config.DATABASE_NAME = db_name
@@ -144,7 +144,7 @@ def evaluate_binary_on_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0,
     # grid of critical inclinations
     i_crits = aux.precalc_grid(config.R_ARRAY, config.R_ARRAY, physics.critical_inclination)
 
-    args = (crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, brkpoint, desired_morphology, maxid)
+    args = (crit_potentials, omega1_grid, omega2_grid, i_crits, phases, maxiter, brkpoint, desired_morphology)
     multiproc.multiprocess_eval(ids, eval_binary_grid_node, args)
 
 

@@ -38,6 +38,9 @@ I_ARRAY = np.round(np.arange(0.0, 1.01, 0.1), 6)  # ranges of inclinations (i_mi
 T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000), np.arange(25000, 50000, 5000)))
 # T_ARRAY = np.concatenate((np.arange(4000, 10001, 1000), np.arange(12000, 20001, 2000)))  # t_eff of components/
 
+SAMPLING_ORDER = [Q_ARRAY, R_ARRAY, R_ARRAY, T_ARRAY, T_ARRAY, I_ARRAY]
+CUMULATIVE_PRODUCT = None  # Calculated for each run as number of nodes for given hypercube (N_INCL, N_INCL*N_TEFF, N_TEFF**2, ...max_id)
+
 # if True inclinations are sampled in region above critical inclination where eclipses occur, otherwise, samples below
 # critical incliations are sampled
 SAMPLE_OVER_CRITICAL_INCLINATION = True
