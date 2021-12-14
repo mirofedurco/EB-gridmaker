@@ -11,7 +11,7 @@ if __name__ == '__main__':
     n_id = 10000000
     indices = np.empty((n_id, 6), dtype=int)
     vals = np.empty((n_id, 6), dtype=float)
-    config.CUMULATIVE_PRODUCT = np.cumprod([o.size for o in reversed(config.SAMPLING_ORDER)])
+    config.CUMULATIVE_PRODUCT = np.cumprod([o.size for o in reversed(config.sampling_order())])
     start = time()
     for n in range(n_id):
         vals[n, :], indices[n, :] = get_params_from_id(n)

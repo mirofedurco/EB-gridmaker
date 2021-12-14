@@ -60,7 +60,7 @@ def get_params_from_id(id):
     n_hyper_cube = np.concatenate((cumulative_product[::-1], [1, ]))
 
     remainder = copy(id)
-    for ii, param in enumerate(config.SAMPLING_ORDER):
+    for ii, param in enumerate(config.sampling_order()):
         index, remainder = divmod(remainder, n_hyper_cube[ii])
 
         result.append(param[index])

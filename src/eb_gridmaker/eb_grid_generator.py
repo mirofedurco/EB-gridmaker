@@ -114,7 +114,7 @@ def evaluate_binary_on_grid(db_name=None, bottom_boundary=0.0, top_boundary=1.0,
     :param desired_morphology: str;
     :return: None;
     """
-    config.CUMULATIVE_PRODUCT = np.cumprod([o.size for o in reversed(config.SAMPLING_ORDER)])
+    config.CUMULATIVE_PRODUCT = np.cumprod([o.size for o in reversed(config.sampling_order())])
     maxid = config.CUMULATIVE_PRODUCT[-1]
 
     if db_name is not None:
