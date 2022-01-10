@@ -69,6 +69,7 @@ for ii, row in enumerate(zip(cursor, cursor2)):
             "t_eff": row[1][5]
         }
     }
+
     try:
         bs = BinarySystem.from_json(community_params)
         # plt.figure(2)
