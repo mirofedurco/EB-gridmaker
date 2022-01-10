@@ -67,6 +67,7 @@ def eval_single_grid_node(iden, counter, phases, maxiter, start_index):
 
 
 def eval_eccentric_random_sample(iden, counter, phases, maxiter, start_index):
+    np.random.seed()
     while True:
         args = aux.draw_eccentric_system_params()
         params = aux.assign_eccentric_system_params(*args)
